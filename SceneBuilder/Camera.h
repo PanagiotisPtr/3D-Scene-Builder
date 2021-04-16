@@ -19,7 +19,7 @@ public:
 	constexpr static float cameraSensitivity = 0.01f;
 	constexpr static float zoomSensitivity = 0.1f;
 
-	Camera(glm::vec3 p, glm::dvec2 r, glm::vec3 c) : pos(p), rotation(r), colour(c), panning(false), lookAt(false) {
+	Camera(glm::vec3 p, glm::dvec2 r) : pos(p), rotation(r), panning(false), lookAt(false) {
 		GlobalEventBus.addEventHandler<Event::CursorPos>([this](const Event::Base& baseEvent) -> void {
 			const Event::CursorPos& e = static_cast<const Event::CursorPos&>(baseEvent);
 
@@ -38,10 +38,6 @@ public:
 		GlobalEventBus.addEventHandler<Event::MouseButton>([this](const Event::Base& baseEvent) -> void {
 			const Event::MouseButton& e = static_cast<const Event::MouseButton&>(baseEvent);
 
-			std::cout << "Mouse Click Handler" << std::endl;
-
-			std::cout << "Button: " << e.button << std::endl;
-
 			if (e.button == GLFW_MOUSE_BUTTON_RIGHT && e.action == GLFW_PRESS) {
 				this->lookAt = true;
 			}
@@ -54,9 +50,6 @@ public:
 			else {
 				this->panning = false;
 			}
-
-			std::cout << "this->lookAt: " << this->lookAt << std::endl;
-			std::cout << "this->panning: " << this->panning << std::endl;
 		});
 
 		GlobalEventBus.addEventHandler<Event::MouseScroll>([this](const Event::Base& baseEvent) -> void {
@@ -97,10 +90,13 @@ public:
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(glm::value_ptr(this->viewMatrix()));
 	}
+
+	void drawWithId() const override {
+		this->draw();
+	}
 private:
 	glm::vec3 pos;
 	glm::dvec2 rotation;
-	glm::vec3 colour;
 	bool panning;
 	bool lookAt;
 

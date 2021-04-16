@@ -9,8 +9,10 @@
 #include <vector>
 #include <functional>
 #include <sstream>
+#include <cmath>
 
 #include "Object.h"
+#include "Pyramid.h"
 #include "EventBus.h"
 #include "Event.h"
 #include "Globals.h"
@@ -25,7 +27,7 @@
 
 class Application {
 public:
-	using constObjectReference = std::reference_wrapper<const Object>;
+	using objectReference = std::reference_wrapper<Object>;
 
 	Application() {
 		if (!glfwInit()) {
@@ -49,6 +51,8 @@ public:
 
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glDepthFunc(GL_LESS);
 
 		glfwSetFramebufferSizeCallback(this->window, [](GLFWwindow* window, int width, int height) {
@@ -94,12 +98,41 @@ public:
 			));
 		});
 
-		std::cout << "Adding resize handler" << std::endl;
 		GlobalEventBus.addEventHandler<Event::WindowResize>([this](const Event::Base& baseEvent) -> void {
 			const Event::WindowResize& e = static_cast<const Event::WindowResize&>(baseEvent);
 
 			this->windowHeight = e.height;
 			this->windowWidth = e.width;
+		});
+
+		GlobalEventBus.addEventHandler<Event::MouseButton>([this](const Event::Base& baseEvent) -> void {
+			const Event::MouseButton& e = static_cast<const Event::MouseButton&>(baseEvent);
+
+			if (e.button != GLFW_MOUSE_BUTTON_LEFT || e.action != GLFW_PRESS) {
+				return;
+			}
+
+			float pixel[4];
+			int flippedY = this->windowHeight - (int)GlobalCursor.y;
+			glfwGetCursorPos(this->window, &GlobalCursor.x, &GlobalCursor.y);
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glViewport(0, 0, this->windowWidth, this->windowHeight);
+			// make sure that the first object is always the camera
+			for (const Object& o : objects) {
+				o.drawWithId();
+			}
+			glReadPixels((int)GlobalCursor.x, flippedY, 1, 1, GL_RGBA, GL_FLOAT, &pixel);
+			for (int i = 0; i < 4; i++) pixel[i] = this->roundToTwoDecimals(pixel[i]);
+
+			for (Object& o : objects) {
+				if (o.getObjectId() == ColourIdGenerator::decodeId({ pixel[0], pixel[1], pixel[2] })) {
+					o.toggleSelect();
+				}
+				else {
+					o.deselect();
+				}
+			}
 		});
 
 		glewExperimental = GL_TRUE;
@@ -123,10 +156,13 @@ public:
 	void start() {
 		while (!glfwWindowShouldClose(this->window))
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			glViewport(0, 0, this->windowWidth, this->windowHeight);
+
 			// make sure that the first object is always the camera
 			for (const Object& o : objects) {
+				glStencilFunc(GL_ALWAYS, 1, 0xFF);
+				glStencilMask(0xFF);
 				o.draw();
 			}
 
@@ -136,15 +172,21 @@ public:
 		glfwTerminate();
 	}
 
-	void addObject(const Object& obj) {
+	void addObject(Object& obj) {
 		std::cout << "Added objects" << std::endl;
-		objects.push_back(std::cref(obj));
+		objects.push_back(std::ref(obj));
 	}
 private:
 	GLFWwindow* window;
-	std::vector<constObjectReference> objects;
+	std::vector<objectReference> objects;
 	int windowWidth;
 	int windowHeight;
+
+	float roundToTwoDecimals(float v) {
+		v += 0.005;
+
+		return std::trunc(100 * v) / 100;
+	}
 };
 
 #endif

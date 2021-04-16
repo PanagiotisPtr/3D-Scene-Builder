@@ -30,6 +30,9 @@
     <ClCompile Include="Globals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ColourIdGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event.h">
@@ -45,6 +48,9 @@
       <Filter>Source Files\Object</Filter>
     </ClInclude>
     <ClInclude Include="Globals.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourIdGenerator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

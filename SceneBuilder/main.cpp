@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "Pyramid.h"
 #include "Camera.h"
+#include "ColourIdGenerator.h"
 
 #define GLEW_STATIC
 
@@ -19,9 +20,11 @@
 
 int main() {
 	Application app;
+	Camera camera({ 0, 0.25, -2 }, { 0, 0 });
+	Pyramid pyramid(0.5f, 0.5f, 0.5f, { 0, 0, 0 }, { 0,0 }, { 1.0f, 0.0f, 1.0f });
 
-	app.addObject(Camera({0, 0.25, -2}, {0, 0}, {0.0f, 0.0f, 1.0f}));
-	app.addObject(Pyramid(0.5f, 0.5f, 0.5f));
+	app.addObject(camera);
+	app.addObject(pyramid);
 
 	app.start();
 
