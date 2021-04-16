@@ -152,7 +152,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application.h" />
+    <ClCompile Include="EventBus.h" />
+    <ClCompile Include="Globals.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Event.h" />
+    <ClInclude Include="Globals.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="Pyramid.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
