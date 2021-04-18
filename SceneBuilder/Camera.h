@@ -19,7 +19,7 @@ public:
 	constexpr static float cameraSensitivity = 0.01f;
 	constexpr static float zoomSensitivity = 0.1f;
 
-	Camera(glm::vec3 p, glm::dvec2 r) : pos(p), rotation(r), panning(false), lookAt(false) {
+	Camera(glm::vec3 p, glm::dvec2 r) : Object(p, r, {0.0f, 0.0f, 0.0f}), panning(false), lookAt(false) {
 		GlobalEventBus.addEventHandler<Event::CursorPos>([this](const Event::Base& baseEvent) -> void {
 			const Event::CursorPos& e = static_cast<const Event::CursorPos&>(baseEvent);
 
@@ -59,14 +59,6 @@ public:
 		});
 	}
 
-	glm::mat4 getTransform() const {
-		glm::mat4 out = glm::identity<glm::mat4>();
-		out = glm::translate(out, pos);
-		out = glm::rotate(out, (float)rotation.x, glm::vec3{ 0,1,0 });
-		out = glm::rotate(out, (float)rotation.y, glm::vec3{ 1,0,0 });
-		return out;
-	}
-
 	void mouseInput(glm::dvec2 rotDelta) {
 		rotation += (rotDelta * Camera::mouseSensitivity);
 		rotation.y = clamp(glm::radians(-80.0), glm::radians(80.0), rotation.y);
@@ -74,12 +66,12 @@ public:
 
 	void pan(glm::vec3 movementVector) {
 		movementVector = movementVector * Camera::moveSensitivity;
-		pos = glm::translate(getTransform(), movementVector) * glm::vec4{ 0.0f,0.0f,0.0f,1.0f };
+		pos = glm::translate(this->getTransform(), movementVector) * glm::vec4{ 0.0f,0.0f,0.0f,1.0f };
 	}
 
 	glm::mat4 viewMatrix() const {
-		const glm::vec3 eye = getTransform() * glm::vec4{ 0.0f, 0.25f, 0.13f, 1.0f };
-		const glm::vec3 cen = getTransform() * glm::vec4{ 0.0f, 0.25f, 0.25f, 1.0f };
+		const glm::vec3 eye = this->getTransform() * glm::vec4{ 0.0f, 0.25f, 0.13f, 1.0f };
+		const glm::vec3 cen = this->getTransform() * glm::vec4{ 0.0f, 0.25f, 0.25f, 1.0f };
 		const glm::vec3 up{ 0.0f, 1.0f, 0.0f };
 		return glm::lookAt(eye, cen, up);
 	}
@@ -94,9 +86,9 @@ public:
 	void drawWithId() const override {
 		this->draw();
 	}
+protected:
+	void drawShape() const override {}
 private:
-	glm::vec3 pos;
-	glm::dvec2 rotation;
 	bool panning;
 	bool lookAt;
 
