@@ -14,12 +14,12 @@
 #include "glm/gtx/string_cast.hpp"
 #include "glm/common.hpp"
 
-#include "Object.h"
+#include "Editable.h"
 
-class Pyramid : public Object {
+class Pyramid : public Editable {
 public:
-	Pyramid(float x, float y, float z, glm::vec3 p, glm::dvec2 r, glm::vec3 c)
-	: xSize(x), ySize(y), zSize(z), Object(p, r, c) {}
+	Pyramid(float x, float y, float z, glm::vec3 p, glm::vec3 c)
+	: xSize(x), ySize(y), zSize(z), Editable(p, c) {}
 
 protected:
 	void drawShape() const override {

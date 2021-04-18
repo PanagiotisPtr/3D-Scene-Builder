@@ -135,6 +135,10 @@ public:
 			}
 		});
 
+		GlobalEventBus.addEventHandler<Event::CursorPos>([this](const Event::Base& baseEvent) -> void {
+			glfwGetCursorPos(this->window, &GlobalCursor.x, &GlobalCursor.y);
+		});
+
 		glewExperimental = GL_TRUE;
 		GLenum err = glewInit();
 		if (err != GLEW_OK)
@@ -183,7 +187,7 @@ private:
 	int windowHeight;
 
 	float roundToTwoDecimals(float v) {
-		v += 0.005;
+		v += 0.005f;
 
 		return std::trunc(100 * v) / 100;
 	}

@@ -163,6 +163,7 @@
     <ClInclude Include="ColourIdGenerator.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Editable.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Pyramid.h" />
   </ItemGroup>

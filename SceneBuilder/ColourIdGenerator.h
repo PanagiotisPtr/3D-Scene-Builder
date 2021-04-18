@@ -3,7 +3,7 @@
 
 class ColourIdGenerator {
 public:
-	constexpr static float stepSize = 0.01;
+	constexpr static float stepSize = 0.01f;
 	static unsigned prevId;
 
 	struct ColourId {

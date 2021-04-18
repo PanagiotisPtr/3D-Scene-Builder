@@ -21,9 +21,9 @@
 
 class Object {
 public:
-	Object(glm::vec3 p, glm::dvec2 r, glm::vec3 c)
+	Object(glm::vec3 p, glm::vec3 c)
 	: colourId(ColourIdGenerator::getColourId()), objectId(ColourIdGenerator::prevId), selected(false),
-	pos(p), rotation(r), colour(c) {}
+	pos(p), rot({0.0f, 0.0f, 0.0f}), scale({ 1.0f , 1.0f, 1.0f }), colour(c) {}
 
 	virtual void draw() const {
 		glColor3fv(glm::value_ptr(colour));
@@ -44,22 +44,25 @@ public:
 
 	void toggleSelect() { selected = !selected; }
 	void select() { selected = true; }
-	void deselect() { selected = false; }
+	virtual void deselect() { selected = false; }
 protected:
 	ColourIdGenerator::ColourId colourId;
 	glm::vec3 pos;
-	glm::dvec2 rotation;
+	glm::vec3 rot;
+	glm::vec3 scale;
 	glm::vec3 colour;
 	unsigned objectId;
 	bool selected;
 
 	virtual void drawShape() const = 0;
 
-	glm::mat4 getTransform() const {
+	virtual glm::mat4 getTransform() const {
 		glm::mat4 out = glm::identity<glm::mat4>();
-		out = glm::translate(out, pos);
-		out = glm::rotate(out, (float)rotation.x, glm::vec3{ 0,1,0 });
-		out = glm::rotate(out, (float)rotation.y, glm::vec3{ 1,0,0 });
+		out = glm::translate(out, this->pos);
+		out = glm::rotate(out, this->rot.x, glm::vec3{ 0,1,0 });
+		out = glm::rotate(out, this->rot.y, glm::vec3{ 1,0,0 });
+		out = glm::rotate(out, this->rot.z, glm::vec3{ 0,0,1 });
+		out = glm::scale(out, { this->scale.x, this->scale.y, this->scale.z });
 
 		return out;
 	}

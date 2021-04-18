@@ -20,8 +20,8 @@
 
 int main() {
 	Application app;
-	Camera camera({ 0, 0.25, -2 }, { 0, 0 });
-	Pyramid pyramid(0.5f, 0.5f, 0.5f, { 0, 0, 0 }, { 0,0 }, { 1.0f, 0.0f, 1.0f });
+	Camera camera({ 0, 0.25, -2 });
+	Pyramid pyramid(0.5f, 0.5f, 0.5f, { 0, 0, 0 }, { 1.0f, 0.0f, 1.0f });
 
 	app.addObject(camera);
 	app.addObject(pyramid);

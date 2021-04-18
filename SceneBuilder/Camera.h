@@ -19,13 +19,14 @@ public:
 	constexpr static float cameraSensitivity = 0.01f;
 	constexpr static float zoomSensitivity = 0.1f;
 
-	Camera(glm::vec3 p, glm::dvec2 r) : Object(p, r, {0.0f, 0.0f, 0.0f}), panning(false), lookAt(false) {
+	Camera(glm::vec3 p) : Object(p, { 0.0f, 0.0f, 0.0f }), panning(false), lookAt(false), prevCursor(GlobalCursor) {
 		GlobalEventBus.addEventHandler<Event::CursorPos>([this](const Event::Base& baseEvent) -> void {
 			const Event::CursorPos& e = static_cast<const Event::CursorPos&>(baseEvent);
 
 			const glm::dvec2 newPos{ e.xpos, e.ypos };
-			const glm::dvec2 diff = newPos - GlobalCursor;
-			GlobalCursor = newPos;
+			const glm::dvec2 diff = newPos - this->prevCursor;
+			this->prevCursor = newPos;
+
 			if (this->lookAt) {
 				this->mouseInput({ -diff.x, diff.y });
 			}
@@ -60,8 +61,9 @@ public:
 	}
 
 	void mouseInput(glm::dvec2 rotDelta) {
-		rotation += (rotDelta * Camera::mouseSensitivity);
-		rotation.y = clamp(glm::radians(-80.0), glm::radians(80.0), rotation.y);
+		this->rot.x += (rotDelta.x * Camera::mouseSensitivity);
+		this->rot.y += (rotDelta.y * Camera::mouseSensitivity);
+		this->rot.y = clamp((float)glm::radians(-80.0), (float)glm::radians(80.0), this->rot.y);
 	};
 
 	void pan(glm::vec3 movementVector) {
@@ -91,6 +93,7 @@ protected:
 private:
 	bool panning;
 	bool lookAt;
+	glm::dvec2 prevCursor;
 
 	template<typename T> T clamp(T a, T b, T x) {
 		if (x < a) return a;
