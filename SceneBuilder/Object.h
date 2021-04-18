@@ -16,14 +16,14 @@
 #include "glm/gtx/string_cast.hpp"
 #include "glm/common.hpp"
 
-#include "Globals.h"
 #include "ColourIdGenerator.h"
 
 class Object {
 public:
 	Object(glm::vec3 p, glm::vec3 c)
 	: colourId(ColourIdGenerator::getColourId()), objectId(ColourIdGenerator::prevId), selected(false),
-	pos(p), rot({0.0f, 0.0f, 0.0f}), scale({ 1.0f , 1.0f, 1.0f }), colour(c) {}
+	moving(false), rotating(false), scaling(false), pos(p), rot({0.0f, 0.0f, 0.0f}),
+	scale({ 1.0f , 1.0f, 1.0f }), colour(c) {}
 
 	virtual void draw() const {
 		glColor3fv(glm::value_ptr(colour));
@@ -42,9 +42,11 @@ public:
 		return this->objectId;
 	}
 
-	void toggleSelect() { selected = !selected; }
-	void select() { selected = true; }
-	virtual void deselect() { selected = false; }
+	void toggleSelect() { this->selected = !this->selected; }
+	void select() { this->selected = true; }
+	bool isSeleted() const { return this->selected;  }
+	virtual void deselect() { this->selected = false; }
+	virtual bool isChanging() const { return this->moving || this->rotating || this->scaling; }
 protected:
 	ColourIdGenerator::ColourId colourId;
 	glm::vec3 pos;
@@ -53,6 +55,9 @@ protected:
 	glm::vec3 colour;
 	unsigned objectId;
 	bool selected;
+	bool moving;
+	bool scaling;
+	bool rotating;
 
 	virtual void drawShape() const = 0;
 

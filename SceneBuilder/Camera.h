@@ -34,7 +34,7 @@ public:
 			if (this->panning) {
 				this->pan(glm::vec3{ diff.x * Camera::cameraSensitivity, diff.y * Camera::cameraSensitivity, 0.0f });
 			}
-		});
+		}, this->getObjectId());
 
 		GlobalEventBus.addEventHandler<Event::MouseButton>([this](const Event::Base& baseEvent) -> void {
 			const Event::MouseButton& e = static_cast<const Event::MouseButton&>(baseEvent);
@@ -51,18 +51,18 @@ public:
 			else {
 				this->panning = false;
 			}
-		});
+		}, this->getObjectId());
 
 		GlobalEventBus.addEventHandler<Event::MouseScroll>([this](const Event::Base& baseEvent) -> void {
 			const Event::MouseScroll& e = static_cast<const Event::MouseScroll&>(baseEvent);
 
 			this->pan(glm::vec3{ 0.0f, 0.0f, e.yoffset * Camera::zoomSensitivity });
-		});
+		}, this->getObjectId());
 	}
 
 	void mouseInput(glm::dvec2 rotDelta) {
-		this->rot.x += (rotDelta.x * Camera::mouseSensitivity);
-		this->rot.y += (rotDelta.y * Camera::mouseSensitivity);
+		this->rot.x += (float)(rotDelta.x * Camera::mouseSensitivity);
+		this->rot.y += (float)(rotDelta.y * Camera::mouseSensitivity);
 		this->rot.y = clamp((float)glm::radians(-80.0), (float)glm::radians(80.0), this->rot.y);
 	};
 
@@ -88,6 +88,8 @@ public:
 	void drawWithId() const override {
 		this->draw();
 	}
+
+	bool isChanging() const override { return true; }
 protected:
 	void drawShape() const override {}
 private:

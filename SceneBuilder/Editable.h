@@ -18,7 +18,7 @@ public:
 	};
 
 	Editable(glm::vec3 p, glm::vec3 c)
-		: Object(p, c), moving(false), rotating(false), scaling(false), prevPos(p), prevRot({0.0f, 0.0f, 0.0f}), prevScale(scale),
+		: Object(p, c), prevPos(p), prevRot({0.0f, 0.0f, 0.0f}), prevScale(scale),
 		prevCursor(GlobalCursor), axis(Axis::NONE) {
 		GlobalEventBus.addEventHandler<Event::CursorPos>([this](const Event::Base& baseEvent) -> void {
 			const Event::CursorPos& e = static_cast<const Event::CursorPos&>(baseEvent);
@@ -54,7 +54,7 @@ public:
 				if (this->axis == Axis::Z) this->rotatebject(glm::vec3{ 0.0f, 0.0f, -(-diff.x + diff.y) });
 			}
 
-		});
+		}, this->getObjectId());
 
 		GlobalEventBus.addEventHandler<Event::KeyPress>([this](const Event::Base& baseEvent) -> void {
 			const Event::KeyPress& e = static_cast<const Event::KeyPress&>(baseEvent);
@@ -99,21 +99,18 @@ public:
 			if (e.key == GLFW_KEY_ESCAPE && e.action == GLFW_PRESS) {
 				this->reset();
 			}
-		});
+		}, this->getObjectId());
 	}
 
 	void deselect() override {
-		if (moving || rotating || scaling) {
+		if (this->moving || this->rotating || this->scaling) {
 			this->place();
 		}
 		else {
-			selected = false;
+			this->selected = false;
 		}
 	}
 protected:
-	bool moving;
-	bool scaling;
-	bool rotating;
 	Axis axis;
 	glm::vec3 prevPos;
 	glm::vec3 prevRot;

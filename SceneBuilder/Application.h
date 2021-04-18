@@ -5,14 +5,16 @@
 	#define GLEW_STATIC
 #endif
 
-#include <iostream>
 #include <vector>
 #include <functional>
 #include <sstream>
+#include <memory>
+#include <queue>
 #include <cmath>
 
 #include "Object.h"
 #include "Pyramid.h"
+#include "Camera.h"
 #include "EventBus.h"
 #include "Event.h"
 #include "Globals.h"
@@ -27,8 +29,6 @@
 
 class Application {
 public:
-	using objectReference = std::reference_wrapper<Object>;
-
 	Application() {
 		if (!glfwInit()) {
 			throw std::exception("GLFW initialisation failed.");
@@ -103,7 +103,7 @@ public:
 
 			this->windowHeight = e.height;
 			this->windowWidth = e.width;
-		});
+		}, GlobalObjectId);
 
 		GlobalEventBus.addEventHandler<Event::MouseButton>([this](const Event::Base& baseEvent) -> void {
 			const Event::MouseButton& e = static_cast<const Event::MouseButton&>(baseEvent);
@@ -116,28 +116,50 @@ public:
 			int flippedY = this->windowHeight - (int)GlobalCursor.y;
 			glfwGetCursorPos(this->window, &GlobalCursor.x, &GlobalCursor.y);
 
+			for (auto& o : GlobalObjects) {
+				o->deselect();
+			}
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glViewport(0, 0, this->windowWidth, this->windowHeight);
 			// make sure that the first object is always the camera
-			for (const Object& o : objects) {
-				o.drawWithId();
+			for (const auto& o : GlobalObjects) {
+				o->drawWithId();
 			}
 			glReadPixels((int)GlobalCursor.x, flippedY, 1, 1, GL_RGBA, GL_FLOAT, &pixel);
 			for (int i = 0; i < 4; i++) pixel[i] = this->roundToTwoDecimals(pixel[i]);
 
-			for (Object& o : objects) {
-				if (o.getObjectId() == ColourIdGenerator::decodeId({ pixel[0], pixel[1], pixel[2] })) {
-					o.toggleSelect();
+			for (auto& o : GlobalObjects) {
+				if (o->getObjectId() == ColourIdGenerator::decodeId({ pixel[0], pixel[1], pixel[2] })) {
+					o->toggleSelect();
 				}
 				else {
-					o.deselect();
+					o->deselect();
 				}
 			}
-		});
+		}, GlobalObjectId);
 
 		GlobalEventBus.addEventHandler<Event::CursorPos>([this](const Event::Base& baseEvent) -> void {
 			glfwGetCursorPos(this->window, &GlobalCursor.x, &GlobalCursor.y);
-		});
+		}, GlobalObjectId);
+
+		GlobalEventBus.addEventHandler<Event::KeyPress>([](const Event::Base& baseEvent) -> void {
+			const Event::KeyPress& e = static_cast<const Event::KeyPress&>(baseEvent);
+
+			if (e.key == GLFW_KEY_1 && e.action == GLFW_PRESS) {
+				GlobalObjectQueue.push(ObjectClasses::PYRAMID);
+			}
+		}, GlobalObjectId);
+
+		GlobalEventBus.addEventHandler<Event::KeyPress>([](const Event::Base& baseEvent) -> void {
+			const Event::KeyPress& e = static_cast<const Event::KeyPress&>(baseEvent);
+
+			if (e.key == GLFW_KEY_X && e.action == GLFW_PRESS) {
+				for (auto& o : GlobalObjects) {
+					if (o->isSeleted() && !o->isChanging()) GlobalDeletionQueue.push(o->getObjectId());
+				}
+			}
+		}, GlobalObjectId);
 
 		glewExperimental = GL_TRUE;
 		GLenum err = glewInit();
@@ -155,6 +177,8 @@ public:
 		glTranslatef(0.0f, 0.0f, 0.4f);
 		glPopMatrix();
 		glfwGetCursorPos(this->window, &GlobalCursor.x, &GlobalCursor.y);
+
+		GlobalObjects.emplace_back(new Camera({ 0, 0.25, -2 }));
 	}
 
 	void start() {
@@ -163,11 +187,31 @@ public:
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			glViewport(0, 0, this->windowWidth, this->windowHeight);
 
+			while (!GlobalObjectQueue.empty()) {
+				switch (GlobalObjectQueue.front()) {
+				case ObjectClasses::PYRAMID:
+					GlobalObjects.emplace_back(new Pyramid(0.5f, 0.5f, 0.5f, { 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+					break;
+				}
+				GlobalObjectQueue.pop();
+			}
+
+			while (!GlobalDeletionQueue.empty()) {
+				unsigned objectId = GlobalDeletionQueue.front();
+				GlobalDeletionQueue.pop();
+
+				GlobalEventBus.detachHandlersForObject(objectId);
+
+				GlobalObjects.erase(std::remove_if(std::begin(GlobalObjects), std::end(GlobalObjects), [objectId](const auto& o) {
+					return o->getObjectId() == objectId;
+				}), std::end(GlobalObjects));
+			}
+
 			// make sure that the first object is always the camera
-			for (const Object& o : objects) {
+			for (const auto& o : GlobalObjects) {
 				glStencilFunc(GL_ALWAYS, 1, 0xFF);
 				glStencilMask(0xFF);
-				o.draw();
+				o->draw();
 			}
 
 			glfwSwapBuffers(this->window);
@@ -175,14 +219,8 @@ public:
 		}
 		glfwTerminate();
 	}
-
-	void addObject(Object& obj) {
-		std::cout << "Added objects" << std::endl;
-		objects.push_back(std::ref(obj));
-	}
 private:
 	GLFWwindow* window;
-	std::vector<objectReference> objects;
 	int windowWidth;
 	int windowHeight;
 
