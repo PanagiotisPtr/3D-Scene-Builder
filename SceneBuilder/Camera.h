@@ -80,7 +80,7 @@ public:
 
 	void draw() const override {
 		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(glm::value_ptr(glm::perspective(glm::radians(40.0f), 4.0f / 3, 0.1f, 10.0f)));
+		glLoadMatrixf(glm::value_ptr(glm::perspective(glm::radians(40.0f), 16.0f / 9.0f, 0.1f, 10.0f)));
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(glm::value_ptr(this->viewMatrix()));
 	}
