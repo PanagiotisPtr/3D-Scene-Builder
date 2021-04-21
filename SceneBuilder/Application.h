@@ -10,13 +10,17 @@
 #include <sstream>
 #include <memory>
 #include <queue>
+#include <iostream>
 #include <cmath>
 
 #include "Object.h"
-#include "Pyramid.h"
+#include "Sphere.h"
+#include "Plane.h"
+#include "Cube.h"
+#include "Cylinder.h"
 #include "Camera.h"
 #include "EventBus.h"
-#include "Event.h"
+#include "Event.h" 
 #include "Globals.h"
 
 #include "GL/glew.h"
@@ -37,23 +41,22 @@ public:
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
-		this->window = glfwCreateWindow(800, 600, "Scene Builder", NULL, NULL);
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		this->window = glfwCreateWindow(mode->width, mode->height, "Scene Builder", NULL, NULL);
 		if (!this->window) {
 			glfwTerminate();
 			throw std::exception("GLFW failed to create window.");
 		}
 
-		this->windowWidth = 800;
-		this->windowHeight = 600;
+		this->windowWidth = mode->width;
+		this->windowHeight = mode->height;
+		this->multiSelectOn = false;
 
 		glfwMakeContextCurrent(this->window);
 		glClearColor(0.4f, 0.5f, 0.6f, 1.0f);
-
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_STENCIL_TEST);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-		glDepthFunc(GL_LESS);
 
 		glfwSetFramebufferSizeCallback(this->window, [](GLFWwindow* window, int width, int height) {
 			GlobalEventBus.pushEvent(Event::WindowResize(
@@ -116,8 +119,10 @@ public:
 			int flippedY = this->windowHeight - (int)GlobalCursor.y;
 			glfwGetCursorPos(this->window, &GlobalCursor.x, &GlobalCursor.y);
 
-			for (auto& o : GlobalObjects) {
-				o->deselect();
+			if (!this->multiSelectOn) {
+				for (auto& o : GlobalObjects) {
+					o->deselect();
+				}
 			}
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,9 +136,9 @@ public:
 
 			for (auto& o : GlobalObjects) {
 				if (o->getObjectId() == ColourIdGenerator::decodeId({ pixel[0], pixel[1], pixel[2] })) {
-					o->toggleSelect();
+					o->select();
 				}
-				else {
+				else if (!this->multiSelectOn) {
 					o->deselect();
 				}
 			}
@@ -143,11 +148,27 @@ public:
 			glfwGetCursorPos(this->window, &GlobalCursor.x, &GlobalCursor.y);
 		}, GlobalObjectId);
 
-		GlobalEventBus.addEventHandler<Event::KeyPress>([](const Event::Base& baseEvent) -> void {
+		GlobalEventBus.addEventHandler<Event::KeyPress>([this](const Event::Base& baseEvent) -> void {
 			const Event::KeyPress& e = static_cast<const Event::KeyPress&>(baseEvent);
 
+			if (e.key == GLFW_KEY_LEFT_CONTROL && e.action == GLFW_PRESS) {
+				this->multiSelectOn = true;
+			}
+			else if (e.key == GLFW_KEY_LEFT_CONTROL && e.action == GLFW_RELEASE) {
+				this->multiSelectOn = false;
+			}
+
 			if (e.key == GLFW_KEY_1 && e.action == GLFW_PRESS) {
-				GlobalObjectQueue.push(ObjectClasses::PYRAMID);
+				GlobalObjectQueue.push(ObjectClasses::PLANE);
+			}
+			if (e.key == GLFW_KEY_2 && e.action == GLFW_PRESS) {
+				GlobalObjectQueue.push(ObjectClasses::CUBE);
+			}
+			if (e.key == GLFW_KEY_3 && e.action == GLFW_PRESS) {
+				GlobalObjectQueue.push(ObjectClasses::SPHERE);
+			}
+			if (e.key == GLFW_KEY_4 && e.action == GLFW_PRESS) {
+				GlobalObjectQueue.push(ObjectClasses::CYLINDER);
 			}
 		}, GlobalObjectId);
 
@@ -184,13 +205,27 @@ public:
 	void start() {
 		while (!glfwWindowShouldClose(this->window))
 		{
+			glEnable(GL_CULL_FACE);
+			glEnable(GL_DEPTH_TEST);
+			glEnable(GL_STENCIL_TEST);
+			glDepthFunc(GL_LESS);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			glViewport(0, 0, this->windowWidth, this->windowHeight);
 
 			while (!GlobalObjectQueue.empty()) {
 				switch (GlobalObjectQueue.front()) {
-				case ObjectClasses::PYRAMID:
-					GlobalObjects.emplace_back(new Pyramid(0.5f, 0.5f, 0.5f, { 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+				case ObjectClasses::SPHERE:
+					GlobalObjects.emplace_back(new Sphere({ 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+					break;
+				case ObjectClasses::PLANE:
+					GlobalObjects.emplace_back(new Plane({ 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+					break;
+				case ObjectClasses::CUBE:
+					GlobalObjects.emplace_back(new Cube({ 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+					break;
+				case ObjectClasses::CYLINDER:
+					GlobalObjects.emplace_back(new Cylinder({ 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
 					break;
 				}
 				GlobalObjectQueue.pop();
@@ -208,9 +243,22 @@ public:
 			}
 
 			// make sure that the first object is always the camera
+			// draw non-selected objects first
+			glStencilMask(0x00);
 			for (const auto& o : GlobalObjects) {
-				glStencilFunc(GL_ALWAYS, 1, 0xFF);
-				glStencilMask(0xFF);
+				if (o->isSeleted()) {
+					continue;
+				}
+				o->draw();
+			}
+			
+			// draw selected objects
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+			for (const auto& o : GlobalObjects) {
+				if (!o->isSeleted()) {
+					continue;
+				}
 				o->draw();
 			}
 
@@ -223,6 +271,7 @@ private:
 	GLFWwindow* window;
 	int windowWidth;
 	int windowHeight;
+	bool multiSelectOn;
 
 	float roundToTwoDecimals(float v) {
 		v += 0.005f;
