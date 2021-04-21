@@ -3,7 +3,6 @@
 
 #include "Globals.h"
 #include "Application.h"
-#include "Pyramid.h"
 #include "Camera.h"
 #include "ColourIdGenerator.h"
 

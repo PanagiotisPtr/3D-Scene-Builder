@@ -12,7 +12,10 @@
 #include "glm/mat4x4.hpp"
 
 enum class ObjectClasses {
-	PYRAMID
+	SPHERE,
+	PLANE,
+	CYLINDER,
+	CUBE,
 };
 
 extern EventBus GlobalEventBus;

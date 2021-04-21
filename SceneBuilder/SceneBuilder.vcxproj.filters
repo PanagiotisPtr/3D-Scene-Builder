@@ -33,6 +33,9 @@
     <ClCompile Include="ColourIdGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>Source Files\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Event.h">
@@ -44,9 +47,6 @@
     <ClInclude Include="Camera.h">
       <Filter>Source Files\Object</Filter>
     </ClInclude>
-    <ClInclude Include="Pyramid.h">
-      <Filter>Source Files\Object</Filter>
-    </ClInclude>
     <ClInclude Include="Globals.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -54,6 +54,18 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Editable.h">
+      <Filter>Source Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>Source Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Plane.h">
+      <Filter>Source Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube.h">
+      <Filter>Source Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Cylinder.h">
       <Filter>Source Files\Object</Filter>
     </ClInclude>
   </ItemGroup>
