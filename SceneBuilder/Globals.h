@@ -16,6 +16,7 @@ enum class ObjectClasses {
 	PLANE,
 	CYLINDER,
 	CUBE,
+	LIGHT
 };
 
 extern EventBus GlobalEventBus;

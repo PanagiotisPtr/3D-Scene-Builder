@@ -18,6 +18,7 @@
 #include "Plane.h"
 #include "Cube.h"
 #include "Cylinder.h"
+#include "Light.h"
 #include "Camera.h"
 #include "EventBus.h"
 #include "Event.h" 
@@ -124,7 +125,7 @@ public:
 					o->deselect();
 				}
 			}
-
+			glDisable(GL_LIGHTING);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glViewport(0, 0, this->windowWidth, this->windowHeight);
 			// make sure that the first object is always the camera
@@ -142,6 +143,8 @@ public:
 					o->deselect();
 				}
 			}
+
+			glEnable(GL_LIGHTING);
 		}, GlobalObjectId);
 
 		GlobalEventBus.addEventHandler<Event::CursorPos>([this](const Event::Base& baseEvent) -> void {
@@ -169,6 +172,9 @@ public:
 			}
 			if (e.key == GLFW_KEY_4 && e.action == GLFW_PRESS) {
 				GlobalObjectQueue.push(ObjectClasses::CYLINDER);
+			}
+			if (e.key == GLFW_KEY_L && e.action == GLFW_PRESS) {
+				GlobalObjectQueue.push(ObjectClasses::LIGHT);
 			}
 		}, GlobalObjectId);
 
@@ -203,11 +209,18 @@ public:
 	}
 
 	void start() {
+		GLfloat global_ambient[] = { 0.6f, 0.6f, 0.6f, 1.0f };
+		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
 		while (!glfwWindowShouldClose(this->window))
 		{
 			glEnable(GL_CULL_FACE);
 			glEnable(GL_DEPTH_TEST);
 			glEnable(GL_STENCIL_TEST);
+			glEnable(GL_LIGHTING);
+			glEnable(GL_COLOR_MATERIAL);
+			glEnable(GL_NORMALIZE);
+			glShadeModel(GL_SMOOTH);
 			glDepthFunc(GL_LESS);
 			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -216,16 +229,19 @@ public:
 			while (!GlobalObjectQueue.empty()) {
 				switch (GlobalObjectQueue.front()) {
 				case ObjectClasses::SPHERE:
-					GlobalObjects.emplace_back(new Sphere({ 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+					GlobalObjects.emplace_back(new Sphere({ 0, 0, 0 }, { 0.8f, 0.2f, 0.2f }));
 					break;
 				case ObjectClasses::PLANE:
-					GlobalObjects.emplace_back(new Plane({ 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+					GlobalObjects.emplace_back(new Plane({ 0, 0, 0 }, { 0.8f, 0.2f, 0.2f }));
 					break;
 				case ObjectClasses::CUBE:
-					GlobalObjects.emplace_back(new Cube({ 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+					GlobalObjects.emplace_back(new Cube({ 0, 0, 0 }, { 0.8f, 0.2f, 0.2f }));
 					break;
 				case ObjectClasses::CYLINDER:
-					GlobalObjects.emplace_back(new Cylinder({ 0, 0, 0 }, { 1.0f, 0.0f, 1.0f }));
+					GlobalObjects.emplace_back(new Cylinder({ 0, 0, 0 }, { 0.8f, 0.2f, 0.2f }));
+					break;
+				case ObjectClasses::LIGHT:
+					GlobalObjects.emplace_back(new Light({ 0, 0, 0 }));
 					break;
 				}
 				GlobalObjectQueue.pop();

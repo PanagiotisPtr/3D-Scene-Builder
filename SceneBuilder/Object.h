@@ -26,7 +26,7 @@ public:
 	scale({ 1.0f , 1.0f, 1.0f }), colour(c) {}
 
 	virtual void draw() const {
-		glColor3fv(glm::value_ptr(colour));
+		glColor3f(this->colour.r, this->colour.g, this->colour.b);
 		this->drawObject();
 		if (this->selected) {
 			this->drawOutline();
@@ -86,6 +86,7 @@ protected:
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		glStencilMask(0x00);
 		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
 
 		glColor3f(0.0f, 1.0f, 0.6f);
 		glMatrixMode(GL_MODELVIEW);
@@ -101,6 +102,7 @@ protected:
 		glStencilMask(0xFF);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_LIGHTING);
 	}
 };
 

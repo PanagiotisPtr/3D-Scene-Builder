@@ -7,9 +7,9 @@
 #include <vector>
 #include <array>
 
-#include "Editable.h"
+#include "Colourful.h"
 
-class Sphere : public Editable {
+class Sphere : public Colourful {
 	using VertexId = size_t;
 	using TriangleId = size_t;
 
@@ -27,7 +27,7 @@ class Sphere : public Editable {
 	std::vector<glm::vec3> vertices;
 	std::vector<SubdivisionTriangle> triangles;
 public:
-	Sphere(glm::vec3 p, glm::vec3 c) : Editable(p, c), vertices{}, triangles{} {
+	Sphere(glm::vec3 p, glm::vec3 c) : Colourful(p, c), vertices{}, triangles{} {
 		this->addVertex({ 0, 0, 1 });
 		this->addVertex({ 1, 0, 0 });
 		this->addVertex({ 0, 1, 0 });

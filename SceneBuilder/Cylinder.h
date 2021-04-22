@@ -18,11 +18,11 @@
 #include <math.h>
 #include <vector>
 
-#include "Editable.h"
+#include "Colourful.h"
 
-class Cylinder : public Editable {
+class Cylinder : public Colourful {
 public:
-	Cylinder(glm::vec3 p, glm::vec3 c) : Editable(p, c) {
+	Cylinder(glm::vec3 p, glm::vec3 c) : Colourful(p, c) {
 		float pi = std::acos(-1.0f);
 		size_t stepCount = 16;
 		float step = 2 * pi / (float)stepCount;

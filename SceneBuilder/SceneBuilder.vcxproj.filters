@@ -68,5 +68,11 @@
     <ClInclude Include="Cylinder.h">
       <Filter>Source Files\Object</Filter>
     </ClInclude>
+    <ClInclude Include="Colourful.h">
+      <Filter>Source Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Source Files\Object</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
