@@ -23,6 +23,8 @@ public:
 		this->scaleObject({ -0.8f / Editable::Sensitivity, -0.8f / Editable::Sensitivity, -0.8f / Editable::Sensitivity });
 		this->place();
 	}
+protected:
+	std::string objectName() const { return "LIGHT"; }
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define OBJECT_OBJECT_H
 
 #include <functional>
+#include <ostream>
 
 #ifndef GLEW_STATIC
 	#define GLEW_STATIC
@@ -40,6 +41,17 @@ public:
 
 	unsigned getObjectId() const {
 		return this->objectId;
+	}
+
+	virtual void serialise(std::ostream& stream) const {
+		stream << this->objectName() << '\n';
+		stream << this->colour.r << ' ' << this->colour.g << ' ' << this->colour.b << '\n';
+		glm::mat4 mat = this->getTransform();
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				stream << mat[i][j] << (j == 3 ? '\n' : ' ');
+			}
+		}
 	}
 
 	void toggleSelect() { this->selected = !this->selected; }
@@ -104,6 +116,8 @@ protected:
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_LIGHTING);
 	}
+
+	virtual std::string objectName() const = 0;
 };
 
 #endif

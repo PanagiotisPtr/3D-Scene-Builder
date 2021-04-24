@@ -74,6 +74,8 @@ protected:
 
 		glEnd();
 	}
+
+	std::string objectName() const { return "CUBE"; }
 };
 
 #endif

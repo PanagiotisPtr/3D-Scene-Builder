@@ -35,6 +35,8 @@ protected:
 
 		glEnd();
 	}
+
+	std::string objectName() const { return "PLANE"; }
 };
 
 #endif

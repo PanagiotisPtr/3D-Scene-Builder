@@ -25,5 +25,6 @@ extern std::vector<std::unique_ptr<Object> > GlobalObjects;
 extern std::queue<ObjectClasses> GlobalObjectQueue;
 extern std::queue<unsigned> GlobalDeletionQueue;
 extern unsigned GlobalObjectId;
+extern size_t GlobalSavedSceneCount;
 
 #endif

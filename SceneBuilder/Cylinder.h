@@ -44,15 +44,15 @@ protected:
 			glVertex3f(x, 0.5f, z);
 		}
 		glEnd();
-		
+
 		glBegin(GL_QUADS);
 		float x1, z1, x2, z2;
 		for (size_t i = 0; i < this->vertices.size() - 1; i++) {
 			x1 = this->vertices[i].x;
 			z1 = this->vertices[i].y;
 
-			x2 = this->vertices[i+1].x;
-			z2 = this->vertices[i+1].y;
+			x2 = this->vertices[i + 1].x;
+			z2 = this->vertices[i + 1].y;
 			glVertex3f(x1, 0.5f, z1);
 			glVertex3f(x2, 0.5f, z2);
 
@@ -82,6 +82,8 @@ protected:
 		}
 		glEnd();
 	}
+
+	std::string objectName() const { return "CYLINDER"; }
 private:
 	std::vector<glm::vec2> vertices;
 };

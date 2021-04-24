@@ -92,6 +92,8 @@ public:
 	bool isChanging() const override { return true; }
 protected:
 	void drawShape() const override {}
+
+	std::string objectName() const { return "CAMERA"; }
 private:
 	bool panning;
 	bool lookAt;

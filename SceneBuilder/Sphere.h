@@ -50,6 +50,8 @@ public:
 		this->subdivide();
 	}
 
+	std::string objectName() const { return "SPHERE"; }
+
 	VertexId addVertex(glm::vec3 vertex);
 	SubdivisionTriangle& addTriangle(std::array <VertexId, 3> vertices);
 

@@ -12,6 +12,8 @@
 #include <queue>
 #include <iostream>
 #include <cmath>
+#include <fstream>
+#include <string>
 
 #include "Object.h"
 #include "Sphere.h"
@@ -176,6 +178,9 @@ public:
 			if (e.key == GLFW_KEY_L && e.action == GLFW_PRESS) {
 				GlobalObjectQueue.push(ObjectClasses::LIGHT);
 			}
+			if (e.key == GLFW_KEY_P && e.action == GLFW_PRESS) {
+				this->saveScene("Scene_" + std::to_string(++GlobalSavedSceneCount) + ".sf");
+			}
 		}, GlobalObjectId);
 
 		GlobalEventBus.addEventHandler<Event::KeyPress>([](const Event::Base& baseEvent) -> void {
@@ -282,6 +287,15 @@ public:
 			glfwPollEvents();
 		}
 		glfwTerminate();
+	}
+
+	void saveScene(std::string filename) const {
+		std::ofstream fout(filename);
+		for (const auto& o : GlobalObjects) {
+			o->serialise(fout);
+		}
+
+		fout.close();
 	}
 private:
 	GLFWwindow* window;
