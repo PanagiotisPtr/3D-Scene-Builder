@@ -26,8 +26,6 @@ ColourIdGenerator::ColourId ColourIdGenerator::getColourId() {
 		throw std::exception("Ran out of IDs");
 	}
 
-	printf("Generated colour id: (%f, %f, %f)\tsum: %f\n", rv.r, rv.g, rv.b, sum);
-
 	return rv;
 }
 
